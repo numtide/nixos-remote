@@ -25,6 +25,8 @@ Options:
 * --disk-encryption-keys remote_path local_path
   copy the contents of the file or pipe in local_path to remote_path in the installer environment,
   after kexec but before installation. Can be repeated.
+* -i ssh_key
+  use ssh_key for authenticating
 * --debug
   enable debug output
 USAGE
@@ -83,6 +85,10 @@ while [[ $# -gt 0 ]]; do
     --no-reboot)
       maybereboot=""
       ;;
+    -i)
+      ssh_args+=("$1" "$2")
+      shift
+      ;;
     *)
       if [[ -z ${ssh_connection:-} ]]; then
         ssh_connection="$1"
@@ -98,13 +104,13 @@ done
 
 # ssh wrapper
 timeout_ssh_() {
-  timeout 10 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$ssh_connection" "$@"
+  timeout 10 ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "${nix_args[@]}" "$ssh_connection" "$@"
 }
 ssh_() {
-  ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "$ssh_connection" "$@"
+  ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no "${nix_args[@]}" "$ssh_connection" "$@"
 }
 nixCopy() {
-  NIX_SSHOPTS='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no' nix copy --extra-experimental-features nix-command "$@"
+  NIX_SSHOPTS="-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ${nix_args[@]}" nix copy --extra-experimental-features nix-command "$@"
 }
 nix_build() {
   nix \
