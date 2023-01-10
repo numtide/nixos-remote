@@ -23,7 +23,7 @@ our [example](https://github.com/numtide/nixos-remote-examples/blob/9768e438b146
 Afterwards you can just run:
 
 ```
-./nixos-remote root@yourip --flake github:your-user/your-repo#your-system
+nix run github:numtide/nixos-remote -- root@yourip --flake github:your-user/your-repo#your-system
 ```
 
 The parameter passed to `--flake` should point to your nixos configuration
